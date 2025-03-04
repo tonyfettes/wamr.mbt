@@ -1,0 +1,10 @@
+{
+  "link": {
+    "wasm": {
+      "export-memory-name": "memory",
+      "exports": [
+        "fib"
+      ]
+    }
+  }
+}

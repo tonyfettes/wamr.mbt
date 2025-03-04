@@ -3,7 +3,7 @@ project(wamr.mbt LANGUAGES C)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_VERBOSE_MAKEFILE on)
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -fsanitize=address -Wmissing-field-initializers -lm")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -Wmissing-field-initializers -lm")
 
 include(CMakePrintHelpers)
 set(MOON_HOME "$ENV{MOON_HOME}")
@@ -28,7 +28,7 @@ set(WAMR_ROOT_DIR src/wamr)
 include(${WAMR_ROOT_DIR}/build-scripts/runtime_lib.cmake)
 add_library(vmlib ${WAMR_RUNTIME_LIB_SOURCE})
 
-add_library(wamr.mbt STATIC src/wamr.c)
+add_library(wamr.mbt STATIC src/wasm/wasm.c)
 add_library(wamr.mbt::wamr.mbt ALIAS wamr.mbt)
 target_link_libraries(wamr.mbt PRIVATE moonbit vmlib)
 
@@ -53,3 +53,5 @@ install(FILES
   ${CMAKE_CURRENT_BINARY_DIR}/wamr.mbt-config.cmake
   DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/wamr.mbt
 )
+
+add_moon_package(src)

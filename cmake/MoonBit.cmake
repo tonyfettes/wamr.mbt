@@ -23,8 +23,8 @@ function(setup_moonbit_module directory)
   set(MOON_CURRENT_TARGET_DIR ${CMAKE_CURRENT_BINARY_DIR}/${MOON_CURRENT_TARGET_DIR} PARENT_SCOPE)
 endfunction()
 
-add_library(moonbit INTERFACE)
-target_include_directories(moonbit INTERFACE "${MOON_HOME}/include")
+add_library(moonbit STATIC "${MOON_HOME}/lib/runtime.c")
+target_include_directories(moonbit PUBLIC "${MOON_HOME}/include")
 
 function(add_moon_executable target_name)
   file(RELATIVE_PATH MOON_CURRENT_PACKAGE ${MOON_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
