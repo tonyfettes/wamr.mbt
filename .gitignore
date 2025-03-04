@@ -1,0 +1,6 @@
+# moon
+target/
+.mooncakes/
+
+# cmake
+build/
