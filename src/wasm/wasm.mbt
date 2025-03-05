@@ -39,6 +39,16 @@ fn Nullable::to[T](self : Nullable[T]) -> T? {
 }
 
 ///|
+extern "c" fn moonbit_ffi_make_closure(
+  code : Nullable[Unit],
+  data : Nullable[Unit]
+) -> Nullable[Unit] = "moonbit_ffi_make_closure"
+
+fn init {
+  ignore(moonbit_ffi_make_closure)
+}
+
+///|
 extern type Engine
 
 ///|
@@ -60,10 +70,61 @@ pub extern "c" fn Module::new(store : Store, binary : Bytes) -> Module = "moonbi
 pub extern "c" fn Module::delete(self : Module) = "moonbit_wasm_module_delete"
 
 ///|
+pub extern "c" fn Module::exports(self : Module) -> ExportTypeVec = "moonbit_wasm_module_exports"
+
+///|
+pub extern "c" fn Module::imports(self : Module) -> ImportTypeVec = "moonbit_wasm_module_imports"
+
+///|
+extern type FuncType
+
+///|
+extern "c" fn FuncType::_new(
+  params : ValtypeVec,
+  results : ValtypeVec
+) -> FuncType = "moonbit_wasm_functype_new"
+
+///|
+pub fn FuncType::new(
+  params : Array[Valtype],
+  results : Array[Valtype]
+) -> FuncType {
+  FuncType::_new(ValtypeVec::of(params), ValtypeVec::of(results))
+}
+
+///|
 extern type Func
 
 ///|
+extern "c" fn Func::_new(
+  store : Store,
+  type_ : FuncType,
+  func : (ValVec, ValVec) -> Unit
+) -> Func = "moonbit_wasm_func_new_with_env"
+
+///|
+pub fn Func::new(
+  store : Store,
+  type_ : FuncType,
+  func : (Array[Val]) -> Array[Val]
+) -> Func {
+  Func::_new(store, type_, fn(args_vec, results_vec) {
+    let args = args_vec.to()
+    let results = func(args)
+    results_vec.renew_uninitialized(results.length())
+    for i, result in results {
+      results_vec[i] = result
+    }
+  })
+}
+
+///|
 extern "c" fn Func::as_extern_(self : Func) -> Extern_ = "moonbit_wasm_func_as_extern"
+
+///|
+pub fn Func::as_extern(self : Func) -> Extern {
+  self.as_extern_().to_extern()
+}
 
 ///|
 pub extern "c" fn Func::param_arity(self : Func) -> Int = "moonbit_wasm_func_param_arity"
@@ -108,6 +169,17 @@ pub enum Extern {
   Memory(Memory)
 }
 
+///|
+pub impl Show for Extern with output(self : Extern, logger : &Logger) -> Unit {
+  match self {
+    Func(_) => logger.write_string("Func(..)")
+    Global(_) => logger.write_string("Global(..)")
+    Table(_) => logger.write_string("Table(..)")
+    Memory(_) => logger.write_string("Memory(..)")
+  }
+}
+
+///|
 fn Extern::to_extern_(self : Extern) -> Extern_ {
   match self {
     Func(func) => func.as_extern_()
@@ -116,6 +188,8 @@ fn Extern::to_extern_(self : Extern) -> Extern_ {
     Memory(memory) => memory.as_extern_()
   }
 }
+
+extern type ExternType
 
 ///|
 priv extern type Extern_
@@ -166,6 +240,7 @@ pub fn ExternVec::op_get(self : ExternVec, index : Int) -> Extern {
 ///|
 pub extern "c" fn ExternVec::delete(self : ExternVec) = "moonbit_wasm_extern_vec_delete"
 
+///|
 pub fn ExternVec::iter(self : ExternVec) -> Iter[Extern] {
   Iter::new(fn(f) {
     for i in 0..<self.size() {
@@ -189,6 +264,7 @@ extern "c" fn Instance::_new(
   imports : FixedArray[Extern_]
 ) -> Instance = "moonbit_wasm_instance_new"
 
+///|
 pub fn Instance::new(
   store : Store,
   module_ : Module,
@@ -215,13 +291,23 @@ pub(all) enum ValKind {
 }
 
 ///|
-fn ValKind::of_int(kind : Int) -> ValKind {
+fn ValKind::of_byte(kind : Byte) -> ValKind {
   match kind {
     0 => ValKind::I32
     1 => ValKind::I64
     2 => ValKind::F32
     3 => ValKind::F64
     kind => abort("invalid ValKind: \{kind}")
+  }
+}
+
+///|
+fn ValKind::to_byte(self : ValKind) -> Byte {
+  match self {
+    ValKind::I32 => 0
+    ValKind::I64 => 1
+    ValKind::F32 => 2
+    ValKind::F64 => 3
   }
 }
 
@@ -240,6 +326,9 @@ extern type ValVec
 extern "c" fn ValVec::new_uninitialized(size : Int) -> ValVec = "moonbit_wasm_val_vec_new_uninitialized"
 
 ///|
+extern "c" fn ValVec::renew_uninitialized(self : ValVec, size : Int) = "moonbit_wasm_val_vec_renew_uninitialized"
+
+///|
 extern "c" fn ValVec::size(self : ValVec) -> Int = "moonbit_wasm_val_vec_size"
 
 ///|
@@ -255,11 +344,11 @@ extern "c" fn ValVec::set_f32(self : ValVec, index : Int, val : Float) = "moonbi
 extern "c" fn ValVec::set_f64(self : ValVec, index : Int, val : Float) = "moonbit_wasm_val_vec_set_f64"
 
 ///|
-extern "c" fn ValVec::_get_valkind(self : ValVec, index : Int) -> Int = "moonbit_wasm_val_vec_get_valkind"
+extern "c" fn ValVec::_get_valkind(self : ValVec, index : Int) -> Byte = "moonbit_wasm_val_vec_get_valkind"
 
 ///|
 fn ValVec::get_valkind(self : ValVec, index : Int) -> ValKind {
-  ValKind::of_int(self._get_valkind(index))
+  ValKind::of_byte(self._get_valkind(index))
 }
 
 ///|

@@ -1,3 +1,8 @@
 {
-  "native-stub": ["wasm.c"]
+  "native-stub": [
+    "wasm.c"
+  ],
+  "import": [
+    "moonbitlang/x/encoding"
+  ]
 }
