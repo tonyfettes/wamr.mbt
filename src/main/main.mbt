@@ -46,7 +46,7 @@ fn main {
     }
     let instance = @wasm.Instance::new(store, module_, instance_imports)
     let instance_exports = instance.exports()
-    let func = for i, export in module_exports {
+    let start = for i, export in module_exports {
       if export.name() == "_start" {
         match instance_exports[i] {
           Func(func) => break func
@@ -57,9 +57,10 @@ fn main {
     } else {
       raise MissingStart
     }
-    guard func.param_arity() == 0
-    guard func.result_arity() == 0
-    guard func.call([]) is []
+    guard start.param_arity() == 0
+    guard start.result_arity() == 0
+    guard start.call([]) is []
+
   } catch {
     error => {
       println("Error: \{error}")
