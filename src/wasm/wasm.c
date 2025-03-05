@@ -3,21 +3,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void *
-moonbit_ffi_make_closure(void *function, void *callback) {
-  return callback;
-}
-
-void *
-moonbit_c_null() {
-  return NULL;
-}
-
-bool
-moonbit_c_is_null(void *ptr) {
-  return ptr == NULL;
-}
-
 wasm_engine_t *
 moonbit_wasm_engine_new() {
   return wasm_engine_new();

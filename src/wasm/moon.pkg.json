@@ -3,6 +3,7 @@
     "wasm.c"
   ],
   "import": [
-    "moonbitlang/x/encoding"
+    "moonbitlang/x/encoding",
+    "tonyfettes/c"
   ]
 }

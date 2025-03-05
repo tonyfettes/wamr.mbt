@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.19)
 project(wamr.mbt LANGUAGES C)
 
+add_subdirectory(.mooncakes/tonyfettes/c)
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_VERBOSE_MAKEFILE on)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -Wmissing-field-initializers -lm")
@@ -62,7 +64,7 @@ add_library(vmlib ${WAMR_RUNTIME_LIB_SOURCE})
 
 add_library(wamr.mbt STATIC src/wasm/wasm.c)
 add_library(wamr.mbt::wamr.mbt ALIAS wamr.mbt)
-target_link_libraries(wamr.mbt PRIVATE moonbit vmlib)
+target_link_libraries(wamr.mbt PRIVATE moonbit vmlib c.mbt::c.mbt)
 
 include(GNUInstallDirs)
 install(
