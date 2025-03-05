@@ -1,10 +1,8 @@
 {
+  "is-main": true,
   "link": {
     "wasm": {
-      "export-memory-name": "memory",
-      "exports": [
-        "fib"
-      ]
+      "export-memory-name": "memory"
     }
   }
 }
