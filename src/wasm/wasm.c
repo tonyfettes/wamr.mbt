@@ -303,12 +303,15 @@ wasm_val_vec_t *
 moonbit_wasm_val_vec_new_uninitialized(int size) {
   wasm_val_vec_t *vec = malloc(sizeof(wasm_val_vec_t));
   wasm_val_vec_new_uninitialized(vec, size);
+  vec->num_elems = size;
   return vec;
 }
 
 void
 moonbit_wasm_val_vec_renew_uninitialized(wasm_val_vec_t *vec, int size) {
+  wasm_val_vec_delete(vec);
   wasm_val_vec_new_uninitialized(vec, size);
+  vec->num_elems = size;
 }
 
 int
