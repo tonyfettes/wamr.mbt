@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 3.19)
 project(wamr.mbt LANGUAGES C)
 
-add_subdirectory(.mooncakes/tonyfettes/c)
+set(c.mbt_DIR ${CMAKE_SOURCE_DIR}/../c.mbt/install/lib/cmake/c.mbt)
+find_package(c.mbt REQUIRED)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_VERBOSE_MAKEFILE on)
@@ -14,8 +15,6 @@ cmake_print_variables(MOON_HOME)
 include(cmake/MoonBit.cmake)
 
 setup_moonbit_module(.)
-
-add_library(wamr.mbt::moonbit ALIAS moonbit)
 
 # Automatically detect platform
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -62,13 +61,15 @@ set(WAMR_ROOT_DIR src/wamr)
 include(${WAMR_ROOT_DIR}/build-scripts/runtime_lib.cmake)
 add_library(vmlib ${WAMR_RUNTIME_LIB_SOURCE})
 
+add_library(wamr.mbt::moonbit ALIAS moonbit)
 add_library(wamr.mbt STATIC src/wasm/wasm.c)
 add_library(wamr.mbt::wamr.mbt ALIAS wamr.mbt)
+add_library(wamr.mbt::vmlib ALIAS vmlib)
 target_link_libraries(wamr.mbt PRIVATE moonbit vmlib c.mbt::c.mbt)
 
 include(GNUInstallDirs)
 install(
-  TARGETS wamr.mbt moonbit vmlib
+  TARGETS wamr.mbt vmlib moonbit
   EXPORT WAMRTargets
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(

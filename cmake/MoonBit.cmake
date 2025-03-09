@@ -1,6 +1,9 @@
 include(CMakePrintHelpers)
 set(MOON_HOME "$ENV{MOON_HOME}")
 
+add_library(moonbit STATIC "${MOON_HOME}/lib/runtime.c")
+target_include_directories(moonbit PUBLIC "${MOON_HOME}/include")
+
 function(setup_moonbit_module directory)
   file(READ ${CMAKE_CURRENT_SOURCE_DIR}/${directory}/moon.mod.json MOON_MOD_JSON)
   string(JSON
